@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="alpha">1</integer>
+    <integer name="numeric">2</integer>
+    <integer name="symbol">3</integer>
+
+</resources>

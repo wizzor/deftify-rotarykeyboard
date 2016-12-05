@@ -5,7 +5,7 @@
     android:keyHeight="60dp"
     >
     <Row>
-        <Key android:codes="49" android:keyLabel="1" android:keyEdgeFlags="left"/>
+        <Key android:codes="49" android:keyLabel="1"/>
     </Row>
 
 </Keyboard>
