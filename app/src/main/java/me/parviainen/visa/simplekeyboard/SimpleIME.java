@@ -22,6 +22,8 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
 
     private KeyboardView kv;
     private Keyboard keyboard;
+    private int currentKeyset;
+    private List<Keyboard> keysets;
     private List<Keyboard.Key> keyboardKeys;
     private ArrayList<Pair<String, Integer>> keylist;
     private Integer currentKey;
@@ -33,9 +35,12 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
     public View onCreateInputView() {
         kv = (KeyboardView)getLayoutInflater().inflate(R.layout.keyboard, null);
         keyboard = new Keyboard(this, R.xml.rotary);
-        Keyboard tmp_keyboard = new Keyboard(this, R.xml.qwerty, R.integer.alpha);
-        keyboardKeys = tmp_keyboard.getKeys();
-
+        keysets = new ArrayList<Keyboard>();
+        keysets.add(new Keyboard(this, R.xml.qwerty, R.integer.alpha));
+        keysets.add(new Keyboard(this, R.xml.qwerty, R.integer.numeric));
+        keysets.add(new Keyboard(this, R.xml.qwerty, R.integer.symbol));
+        keyboardKeys = keysets.get(0).getKeys();
+        currentKeyset = 0;
         kv.setKeyboard(keyboard);
         kv.setOnKeyboardActionListener(this);
         keylist = new ArrayList<>();
@@ -109,13 +114,13 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
         Log.v("KEYS", "Keydown"+keyCode);
         List<Keyboard.Key> keys = keyboard.getKeys();
         switch(keyCode){
-            case 8: {
+            case 9: {
                 incrementCurrentKey();
                 keys.get(0).label = keyboardKeys.get(currentKey).label;
                 Log.v("KEYS", "CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
             }
-            case 9: {
+            case 8: {
                 decrementCurrentKey();
                 keys.get(0).label = keyboardKeys.get(currentKey).label;
                 Log.v("KEYS", "CUR:"+keyboardKeys.get(currentKey).codes[0]);
@@ -125,6 +130,12 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
                 sendKeycode(keyboardKeys.get(currentKey).codes[0]);
                 Log.v("KEYS", "CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
+            }
+            case 21:{
+                switchKeyboard(-1);
+            }
+            case 22:{
+                switchKeyboard(1);
             }
         }
 
@@ -154,6 +165,34 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
             currentKey -= 1;
             return currentKey;
         }
+    }
+
+    private void switchKeyboard(int amount){
+        Log.v("KEYS", "KB#:"+currentKeyset);
+        if(amount > 0){
+            amount = 1;
+        }else{
+            amount = -1;
+        }
+        Log.v("KEYS", "amount#:"+amount);
+        if(currentKeyset+amount > keysets.size()-1) {
+            currentKeyset = 0;
+            Log.v("KEYS", "Too big#:"+currentKeyset);
+        }else if(currentKeyset+amount < 0){
+            currentKeyset = keysets.size()-1;
+            Log.v("KEYS", "too small#:"+currentKeyset);
+        }else{
+            Log.v("KEYS", "Increasing by#:"+amount);
+            currentKeyset += amount;
+        }
+        keyboardKeys = keysets.get(currentKeyset).getKeys();
+        maxKeyIndex=keyboardKeys.size()-1;
+        currentKey = 0;
+        List<Keyboard.Key> keys = keyboard.getKeys();
+        keys.get(0).label = keyboardKeys.get(currentKey).label;
+        kv.invalidateAllKeys();
+        Log.v("KEYS", "KB#:"+currentKeyset);
+
     }
 
     private void sendKeycode(int primaryCode){
