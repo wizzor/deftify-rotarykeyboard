@@ -2,10 +2,22 @@
     android:keyWidth="10%p"
     android:horizontalGap="0px"
     android:verticalGap="0px"
-    android:keyHeight="60dp"
+    android:keyHeight="45dp"
     >
-    <Row>
-        <Key android:codes="49" android:keyLabel="1"/>
+    <Row android:verticalGap="25dp">
+        <Key android:codes="49" android:keyLabel="1" android:keyWidth="10%"/>
+        <Key android:codes="49" android:keyLabel="1" android:keyWidth="10%"/>
+        <Key android:codes="49" android:keyLabel="1" android:keyWidth="10%"/>
+        <Key android:codes="49" android:keyLabel="1" android:keyWidth="30%" android:keyHeight="65dp" android:horizontalGap="5%"/>
+        <Key android:codes="49" android:keyLabel="1" android:keyWidth="10%" android:horizontalGap="5%"/>
+        <Key android:codes="49" android:keyLabel="1" android:keyWidth="10%"/>
+        <Key android:codes="49" android:keyLabel="1" android:keyWidth="10%"/>
+    </Row>
+
+    <Row android:horizontalGap="10%" android:keyHeight="40dp">
+        <Key android:codes="49" android:keyLabel="Numbers" android:keyWidth="30%"/>
+        <Key android:codes="49" android:keyLabel="Letters" android:keyWidth="30%"/>
+        <Key android:codes="49" android:keyLabel="Other" android:keyWidth="30%"/>
     </Row>
 
 </Keyboard>
