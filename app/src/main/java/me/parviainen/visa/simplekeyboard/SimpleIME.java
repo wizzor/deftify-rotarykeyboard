@@ -47,6 +47,7 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
 
         currentKey = 0;
         maxKeyIndex=keyboardKeys.size()-1;
+        updateKeys();
         return kv;
     }
 
@@ -81,10 +82,44 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
 
     }
 
-    private ArrayList cycleArray(ArrayList array, int min, int max){
+    private ArrayList cycledArraySegment(List array, int start, int count){
         ArrayList output = new ArrayList();
+        int maxArrayIndex = array.size()-1;
+        Log.v("KEYS", "Start point:" +start + " Count:" +count);
 
-        return output;
+        if(start > maxArrayIndex){
+            return output;
+        }else{
+            int i = 0;
+            if(start<0){
+                for(i=maxArrayIndex+start+1; i<=maxArrayIndex; i++){
+                    if(count>0) {
+                        output.add(array.get(i));
+                        count--;
+                    } else {
+                        break;
+                    }
+                }
+                start = 0;
+            }
+            Log.v("KEYS", "Entering adder loop, with start: " +start);
+            for (i=start; i<=maxArrayIndex; i++){
+
+                if(count > 0) {
+                    Log.v("KEYS", "Adding element: " +i);
+                    output.add(array.get(i));
+                    count -= 1;
+                } else {
+                    break;
+                }
+
+            }
+            for (i=0; i<count; i++){
+                output.add(array.get(i));
+            }
+
+            return output;
+        }
     }
 
     @Override
@@ -123,14 +158,12 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
             case 9: {
                 incrementCurrentKey();
                 playClick();
-                keys.get(mainKey).label = keyboardKeys.get(currentKey).label;
                 Log.v("KEYS", "CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
             }
             case 8: {
                 decrementCurrentKey();
                 playClick();
-                keys.get(mainKey).label = keyboardKeys.get(currentKey).label;
                 Log.v("KEYS", "CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
             }
@@ -149,6 +182,8 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
             }
         }
 
+        updateKeys();
+
 
 
 
@@ -160,9 +195,11 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
     private Integer incrementCurrentKey(){
         if(currentKey+1 > maxKeyIndex){
             currentKey = 0;
+            Log.v("KEYS", "Current Key"+currentKey);
             return currentKey;
         }else{
             currentKey += 1;
+            Log.v("KEYS", "Current Key"+currentKey);
             return currentKey;
         }
     }
@@ -170,11 +207,40 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
     private Integer decrementCurrentKey(){
         if(currentKey-1 < 0){
             currentKey = maxKeyIndex;
+            Log.v("KEYS", "Current Key"+currentKey);
             return currentKey;
         }else{
             currentKey -= 1;
+            Log.v("KEYS", "Current Key"+currentKey);
             return currentKey;
         }
+    }
+
+    private void updateKeys(){
+        Log.v("KEYS", "Updated Keys#:"+currentKeyset);
+
+        int minKey = 0;
+        int maxKey = 6;
+        List<Keyboard.Key> keys = keyboard.getKeys();
+        ArrayList<Keyboard.Key> newKeys = cycledArraySegment(keyboardKeys, currentKey-3, 7);
+
+        Log.v("KEYS", "New Keys#:"+newKeys.size());
+
+        String listString = "";
+
+        for (Keyboard.Key s : newKeys)
+        {
+            listString += s.label + " ";
+        }
+
+        Log.v("KEYS", "KEYS ARE HERE" + listString);
+
+
+        for(int i=minKey; i<=maxKey; i++){
+            keys.get(i).label = newKeys.get(i).label;
+        }
+        kv.invalidateAllKeys();
+
     }
 
     private void switchKeyboard(int amount){
