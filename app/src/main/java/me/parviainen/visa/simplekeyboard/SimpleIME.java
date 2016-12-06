@@ -74,6 +74,19 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
         }
     }
 
+    private void playClick(){
+        Log.v("Playing", "Click");
+        AudioManager am = (AudioManager)getSystemService(AUDIO_SERVICE);
+        am.playSoundEffect(AudioManager.FX_KEY_CLICK);
+
+    }
+
+    private ArrayList cycleArray(ArrayList array, int min, int max){
+        ArrayList output = new ArrayList();
+
+        return output;
+    }
+
     @Override
     public void onPress(int primaryCode) {
     }
@@ -109,12 +122,14 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
         switch(keyCode){
             case 9: {
                 incrementCurrentKey();
+                playClick();
                 keys.get(mainKey).label = keyboardKeys.get(currentKey).label;
                 Log.v("KEYS", "CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
             }
             case 8: {
                 decrementCurrentKey();
+                playClick();
                 keys.get(mainKey).label = keyboardKeys.get(currentKey).label;
                 Log.v("KEYS", "CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
