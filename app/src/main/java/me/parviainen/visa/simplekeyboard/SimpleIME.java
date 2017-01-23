@@ -25,6 +25,7 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
     private int currentKeyset;
     private List<Keyboard> keysets;
     private List<Keyboard.Key> keyboardKeys;
+    private List<Keyboard.Key> keys;
     private ArrayList<Pair<String, Integer>> keylist;
     private Integer currentKey;
     private Integer maxKeyIndex;
@@ -40,8 +41,12 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
         keysets.add(new Keyboard(this, R.xml.qwerty, R.integer.numeric));
         keysets.add(new Keyboard(this, R.xml.qwerty, R.integer.alpha));
         keysets.add(new Keyboard(this, R.xml.qwerty, R.integer.symbol));
-        keyboardKeys = keysets.get(0).getKeys();
+
         currentKeyset = 1;
+        keyboardKeys = keysets.get(currentKeyset).getKeys();
+        keys = keyboard.getKeys();
+        keys.get(7+currentKeyset).pressed = true;
+
         kv.setKeyboard(keyboard);
         kv.setOnKeyboardActionListener(this);
 
@@ -153,23 +158,23 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event){
         Log.v("KEYS", "Keydown"+keyCode);
-        List<Keyboard.Key> keys = keyboard.getKeys();
+        keys = keyboard.getKeys();
         switch(keyCode){
             case 9: {
                 incrementCurrentKey();
                 playClick();
-                Log.v("KEYS", "CUR:"+keyboardKeys.get(currentKey).codes[0]);
+                Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
             }
             case 8: {
                 decrementCurrentKey();
                 playClick();
-                Log.v("KEYS", "CUR:"+keyboardKeys.get(currentKey).codes[0]);
+                Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
             }
             case 66: {
                 sendKeycode(keyboardKeys.get(currentKey).codes[0]);
-                Log.v("KEYS", "CUR:"+keyboardKeys.get(currentKey).codes[0]);
+                Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
             }
             case 21:{
@@ -179,6 +184,10 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
             case 22:{
                 switchKeyboard(1);
                 break;
+            }
+            default:{
+                Log.v("KEYS", "Unrecognized command:"+keyCode);
+                return super.onKeyDown(keyCode, event);
             }
         }
 
@@ -221,7 +230,7 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
 
         int minKey = 0;
         int maxKey = 6;
-        List<Keyboard.Key> keys = keyboard.getKeys();
+        keys = keyboard.getKeys();
         ArrayList<Keyboard.Key> newKeys = cycledArraySegment(keyboardKeys, currentKey-3, 7);
 
         Log.v("KEYS", "New Keys#:"+newKeys.size());
@@ -245,7 +254,6 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
 
     private void switchKeyboard(int amount){
         Log.v("KEYS", "KB#:"+currentKeyset);
-        List<Keyboard.Key> keys = keyboard.getKeys();
         keys.get(7+currentKeyset).pressed = false;
         if(amount > 0){
             amount = 1;
