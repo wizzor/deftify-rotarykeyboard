@@ -1,14 +1,19 @@
 package me.parviainen.visa.simplekeyboard;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
 import android.util.Pair;
 import android.view.View;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.EditorInfo;
 import android.view.KeyEvent;
 import android.media.AudioManager;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +38,11 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
 
     private boolean caps = false;
 
+    private Intent startIntent;
+    private int startId;
+
+    private String TAG = "ROTARYKB";
+
     @Override
     public View onCreateInputView() {
         kv = (KeyboardView)getLayoutInflater().inflate(R.layout.keyboard, null);
@@ -53,13 +63,37 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
         currentKey = 0;
         maxKeyIndex=keyboardKeys.size()-1;
         updateKeys();
+        Log.v(TAG, "Keyboard Service Started");
         return kv;
+    }
+
+    public void onStartInputView(EditorInfo attribute, boolean restarting){
+        Log.v(TAG, "Keyboard Input Started");
+        Intent intent = new Intent("me.parviainen.visa.simplekeyboard.KeyboardStateBroadcast");
+        intent.putExtra("state", "ACTIVE");
+        sendBroadcast(intent);
+        super.onStartInputView(attribute, restarting);
+    }
+
+    public void onFinishInput(){
+        Log.v(TAG, "Keyboard Input Finished");
+        Intent intent = new Intent("me.parviainen.visa.simplekeyboard.KeyboardStateBroadcast");
+        intent.putExtra("state", "INACTIVE");
+        sendBroadcast(intent);
+        super.onFinishInput();
     }
 
 
     @Override
     public void onKey(int primaryCode, int[] keyCodes) {
         sendKeycode(primaryCode);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startIdInput){
+        startIntent = intent;
+        startId = startIdInput;
+        return super.onStartCommand(intent, flags, startId);
     }
 
     private void playClick(int keyCode){
@@ -177,6 +211,17 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
                 Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
             }
+            case 19:{
+                Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);
+                Log.v("KEYS", "This should enable suggestions");
+                break;
+            }
+            case 20:{
+                Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);
+                Log.v("KEYS", "This should close the keyboard");
+                sendKeycode(-4);
+                break;
+            }
             case 21:{
                 switchKeyboard(-1);
                 break;
@@ -285,24 +330,28 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
 
         InputConnection ic = getCurrentInputConnection();
         playClick(primaryCode);
-        switch(primaryCode){
-            case Keyboard.KEYCODE_DELETE :
-                ic.deleteSurroundingText(1, 0);
-                break;
-            case Keyboard.KEYCODE_SHIFT:
-                caps = !caps;
-                keyboard.setShifted(caps);
-                kv.invalidateAllKeys();
-                break;
-            case Keyboard.KEYCODE_DONE:
-                ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
-                break;
-            default:
-                char code = (char)primaryCode;
-                if(Character.isLetter(code) && caps){
-                    code = Character.toUpperCase(code);
-                }
-                ic.commitText(String.valueOf(code),1);
+        try {
+            switch (primaryCode) {
+                case Keyboard.KEYCODE_DELETE:
+                    ic.deleteSurroundingText(1, 0);
+                    break;
+                case Keyboard.KEYCODE_SHIFT:
+                    caps = !caps;
+                    keyboard.setShifted(caps);
+                    kv.invalidateAllKeys();
+                    break;
+                case Keyboard.KEYCODE_DONE:
+                    ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
+                    break;
+                default:
+                    char code = (char) primaryCode;
+                    if (Character.isLetter(code) && caps) {
+                        code = Character.toUpperCase(code);
+                    }
+                    ic.commitText(String.valueOf(code), 1);
+            }
+        }catch(Throwable e){
+            Log.v("KEYS", "Something went wrong");
         }
     }
 
