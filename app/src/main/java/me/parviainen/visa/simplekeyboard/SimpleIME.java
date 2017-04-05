@@ -43,6 +43,17 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
 
     private String TAG = "ROTARYKB";
 
+    private final int KEYCODE_DPAD_UP = 19;
+    private final int KEYCODE_DPAD_DOWN = 20;
+    private final int KEYCODE_DPAD_LEFT = 21;
+    private final int KEYCODE_DPAD_RIGHT = 22;
+
+    private final int KEYCODE_NUMKEY_ONE = 8;
+    private final int KEYCODE_NUMKEY_TWO = 9;
+    private final int KEYCODE_ENTER = 66;
+
+
+
     @Override
     public View onCreateInputView() {
         kv = (KeyboardView)getLayoutInflater().inflate(R.layout.keyboard, null);
@@ -68,19 +79,27 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
     }
 
     public void onStartInputView(EditorInfo attribute, boolean restarting){
-        Log.v(TAG, "Keyboard Input Started");
-        Intent intent = new Intent("me.parviainen.visa.simplekeyboard.KeyboardStateBroadcast");
-        intent.putExtra("state", "ACTIVE");
-        sendBroadcast(intent);
+        sendActiveStateBroadcast();
         super.onStartInputView(attribute, restarting);
     }
 
     public void onFinishInput(){
+        sendInactiveStateBroadcast();
+        super.onFinishInput();
+    }
+
+    public void sendActiveStateBroadcast(){
+        Log.v(TAG, "Keyboard Input Finished");
+        Intent intent = new Intent("me.parviainen.visa.simplekeyboard.KeyboardStateBroadcast");
+        intent.putExtra("state", "ACTIVE");
+        sendBroadcast(intent);
+    }
+
+    public void sendInactiveStateBroadcast(){
         Log.v(TAG, "Keyboard Input Finished");
         Intent intent = new Intent("me.parviainen.visa.simplekeyboard.KeyboardStateBroadcast");
         intent.putExtra("state", "INACTIVE");
         sendBroadcast(intent);
-        super.onFinishInput();
     }
 
 
@@ -194,39 +213,40 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
         Log.v("KEYS", "Keydown"+keyCode);
         keys = keyboard.getKeys();
         switch(keyCode){
-            case 9: {
+            case KEYCODE_NUMKEY_ONE: {
                 incrementCurrentKey();
                 playClick();
                 Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
             }
-            case 8: {
+            case KEYCODE_NUMKEY_TWO: {
                 decrementCurrentKey();
                 playClick();
                 Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
             }
-            case 66: {
+            case KEYCODE_ENTER: {
                 sendKeycode(keyboardKeys.get(currentKey).codes[0]);
                 Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
             }
-            case 19:{
+            case KEYCODE_DPAD_UP:{
                 Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 Log.v("KEYS", "This should enable suggestions");
                 break;
             }
-            case 20:{
+            case KEYCODE_DPAD_DOWN:{
                 Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 Log.v("KEYS", "This should close the keyboard");
                 sendKeycode(-4);
+                requestHideSelf(0);
                 break;
             }
-            case 21:{
+            case KEYCODE_DPAD_LEFT:{
                 switchKeyboard(-1);
                 break;
             }
-            case 22:{
+            case KEYCODE_DPAD_RIGHT:{
                 switchKeyboard(1);
                 break;
             }
@@ -353,6 +373,11 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
         }catch(Throwable e){
             Log.v("KEYS", "Something went wrong");
         }
+    }
+
+    public void requestHideSelf(int flags){
+        sendInactiveStateBroadcast();
+        super.requestHideSelf(flags);
     }
 
 
