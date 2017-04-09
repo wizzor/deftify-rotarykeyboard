@@ -1,12 +1,15 @@
 package me.parviainen.visa.simplekeyboard;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.Keyboard;
 import android.inputmethodservice.KeyboardView;
+import android.os.IBinder;
 import android.util.Pair;
 import android.view.View;
+import android.view.Window;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.KeyEvent;
@@ -35,6 +38,7 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
     private Integer currentKey;
     private Integer maxKeyIndex;
     private Integer mainKey = 3;
+    private InputMethodManager mInputMethodManager;
 
     private boolean caps = false;
 
@@ -51,12 +55,19 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
     private final int KEYCODE_NUMKEY_ONE = 8;
     private final int KEYCODE_NUMKEY_TWO = 9;
     private final int KEYCODE_ENTER = 66;
+    private final int KEYCODE_MENU = 41;
+
+    private final int KEYCODE_SPACE = 32;
+    private final int KEYCODE_BACKSPACE = -5;
 
 
 
     @Override
     public View onCreateInputView() {
         kv = (KeyboardView)getLayoutInflater().inflate(R.layout.keyboard, null);
+
+        mInputMethodManager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+
         keyboard = new Keyboard(this, R.xml.rotary);
         keysets = new ArrayList<Keyboard>();
         keysets.add(new Keyboard(this, R.xml.qwerty, R.integer.numeric));
@@ -105,7 +116,17 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
 
     @Override
     public void onKey(int primaryCode, int[] keyCodes) {
-        sendKeycode(primaryCode);
+
+        Log.v(TAG, "Sending PrimaryCode: " + primaryCode);
+
+        if(primaryCode == -101){
+            Log.v(TAG, "Language switch initialized");
+            handleLanguageSwitch();
+
+        }else {
+
+            sendKeycode(primaryCode);
+        }
     }
 
     @Override
@@ -238,18 +259,25 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
             case KEYCODE_DPAD_DOWN:{
                 Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 Log.v("KEYS", "This should close the keyboard");
-                sendKeycode(-4);
+                // Enabling this will cause the keyboard to send a finish signal to
+                // the input before closing, but often it's not what the user wants.
+                //sendKeycode(-4);
                 requestHideSelf(0);
                 break;
             }
             case KEYCODE_DPAD_LEFT:{
-                switchKeyboard(-1);
+                sendKeycode(KEYCODE_BACKSPACE);
                 break;
             }
             case KEYCODE_DPAD_RIGHT:{
+                sendKeycode(KEYCODE_SPACE);
+                break;
+            }
+            case KEYCODE_MENU:{
                 switchKeyboard(1);
                 break;
             }
+
             default:{
                 Log.v("KEYS", "Unrecognized command:"+keyCode);
                 return super.onKeyDown(keyCode, event);
@@ -312,6 +340,7 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
 
         for(int i=minKey; i<=maxKey; i++){
             keys.get(i).label = newKeys.get(i).label;
+            keys.get(i).codes = newKeys.get(i).codes;
         }
         kv.invalidateAllKeys();
 
@@ -344,6 +373,22 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
         keys.get(7+currentKeyset).pressed = true;
         Log.v("KEYS", "KB#:"+currentKeyset);
 
+    }
+
+    private void handleLanguageSwitch() {
+        mInputMethodManager.showInputMethodPicker();
+    }
+
+    private IBinder getToken() {
+        final Dialog dialog = getWindow();
+        if (dialog == null) {
+            return null;
+        }
+        final Window window = dialog.getWindow();
+        if (window == null) {
+            return null;
+        }
+        return window.getAttributes().token;
     }
 
     private void sendKeycode(int primaryCode){

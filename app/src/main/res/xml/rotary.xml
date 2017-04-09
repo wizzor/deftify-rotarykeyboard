@@ -18,6 +18,7 @@
         <Key android:codes="49" android:keyLabel="Numbers" android:keyWidth="30%"/>
         <Key android:codes="49" android:keyLabel="Letters" android:keyWidth="30%"/>
         <Key android:codes="49" android:keyLabel="Other" android:keyWidth="30%"/>
+        <Key android:codes="-101" android:keyLabel="SW" android:keyWidth="10%"/>
     </Row>
 
 </Keyboard>
