@@ -55,7 +55,7 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
     private final int KEYCODE_NUMKEY_ONE = 8;
     private final int KEYCODE_NUMKEY_TWO = 9;
     private final int KEYCODE_ENTER = 66;
-    private final int KEYCODE_MENU = 41;
+    private final int KEYCODE_MENU = 82;
 
     private final int KEYCODE_SPACE = 32;
     private final int KEYCODE_BACKSPACE = -5;
@@ -234,13 +234,13 @@ public class SimpleIME extends InputMethodService implements KeyboardView.OnKeyb
         Log.v("KEYS", "Keydown"+keyCode);
         keys = keyboard.getKeys();
         switch(keyCode){
-            case KEYCODE_NUMKEY_ONE: {
+            case KEYCODE_NUMKEY_TWO: {
                 incrementCurrentKey();
                 playClick();
                 Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);
                 break;
             }
-            case KEYCODE_NUMKEY_TWO: {
+            case KEYCODE_NUMKEY_ONE: {
                 decrementCurrentKey();
                 playClick();
                 Log.v("KEYS", "CODE"+keyCode+"CUR:"+keyboardKeys.get(currentKey).codes[0]);

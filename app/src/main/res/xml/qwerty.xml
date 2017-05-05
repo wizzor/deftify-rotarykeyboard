@@ -33,6 +33,9 @@
         <Key android:codes="120" android:keyLabel="x"/>
         <Key android:codes="121" android:keyLabel="y"/>
         <Key android:codes="122" android:keyLabel="z"/>
+        <Key android:keyOutputText="å" android:keyLabel="å"/>
+        <Key android:keyOutputText="ä" android:keyLabel="ä"/>
+        <Key android:keyOutputText="ö" android:keyLabel="ö"/>
         <Key android:codes="32" android:keyLabel="SPACE" android:keyWidth="40%p" android:isRepeatable="true"/>
         <Key android:codes="-5" android:keyLabel="DEL" android:keyWidth="20%p" android:isRepeatable="true"/>
         <Key android:codes="-4" android:keyLabel="DONE" android:keyWidth="20%p" android:keyEdgeFlags="right"/>
@@ -59,7 +62,9 @@
     <Row android:keyboardMode="@integer/symbol">
 
         <Key android:codes="46" android:keyLabel="."/>
-        <Key android:codes="63,33,58" android:keyLabel="\? ! :" android:keyEdgeFlags="right"/>
+        <Key android:codes="63" android:keyLabel="\?" android:keyEdgeFlags="right"/>
+        <Key android:codes="33" android:keyLabel="!" android:keyEdgeFlags="right"/>
+        <Key android:codes="58" android:keyLabel=":" android:keyEdgeFlags="right"/>
         <Key android:codes="44" android:keyLabel="," android:keyWidth="10%p"  android:keyEdgeFlags="left"/>
         <Key android:codes="47" android:keyLabel="/" android:keyWidth="10%p" />
         <Key android:codes="32" android:keyLabel="SPACE" android:keyWidth="40%p" android:isRepeatable="true"/>
